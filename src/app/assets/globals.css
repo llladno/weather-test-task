@@ -1,26 +1,88 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f6f8;
+  --foreground: #12131a;
+  --surface: #ffffff;
+  --surface-glass: rgb(255 255 255 / 70%);
+  --border-glass: rgb(255 255 255 / 40%);
+}
+
+.dark {
+  --background: #0b1220;
+  --foreground: #f2f4f7;
+  --surface: #111c2e;
+  --surface-glass: rgb(17 28 46 / 60%);
+  --border-glass: rgb(255 255 255 / 10%);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-surface: var(--surface);
+  --color-surface-glass: var(--surface-glass);
+  --color-border-glass: var(--border-glass);
+
+  --color-primary-50: #fff1eb;
+  --color-primary-100: #ffdfcf;
+  --color-primary-200: #ffbd9f;
+  --color-primary-300: #ff9968;
+  --color-primary-400: #fa8047;
+  --color-primary-500: #f2662d;
+  --color-primary-600: #db5320;
+  --color-primary-700: #b8421a;
+  --color-primary-800: #93361a;
+  --color-primary-900: #772d19;
+
+  --font-sans: var(--font-plus-jakarta-sans);
   --font-mono: var(--font-geist-mono);
+
+  --radius-card: 1.25rem;
+  --radius-pill: 9999px;
+
+  --shadow-card: 0 8px 30px rgb(0 0 0 / 0.06);
+  --shadow-card-dark: 0 8px 30px rgb(0 0 0 / 0.35);
+
+  --animate-fade-in-up: fade-in-up 0.6s ease-out both;
+  --animate-fade-in: fade-in 0.5s ease-out both;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
 body {
+  position: relative;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(640px circle at 8% 8%, rgb(250 128 71 / 30%), transparent 60%),
+    radial-gradient(560px circle at 92% 15%, rgb(96 165 250 / 22%), transparent 60%),
+    radial-gradient(720px circle at 50% 105%, rgb(242 102 45 / 22%), transparent 60%),
+    radial-gradient(480px circle at 25% 90%, rgb(196 132 252 / 16%), transparent 60%);
 }
