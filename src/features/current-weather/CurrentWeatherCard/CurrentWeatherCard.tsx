@@ -35,7 +35,7 @@ export const CurrentWeatherCard = ({ weather, location, photo }: CurrentWeatherC
           >
             <span className="inline-flex max-w-full items-center truncate text-xs font-medium text-white/90">
               {location.name} <br />
-              {location.state ? `${location.state}` : ""}, {location.country}
+              {[location.state, location.country].filter(Boolean).join(", ")}
             </span>
             <Image
               src={getWeatherIconUrl(condition.icon)}
