@@ -19,10 +19,6 @@ export const mockWeatherApi = async (page: Page) => {
 
   await page.route("**/api/weather?*", async (route) => {
     const nowSeconds = Math.floor(Date.now() / 1000);
-    // Kept well clear of BERLIN_TEMP_CELSIUS (and its feels_like) so the
-    // current-weather temperature never renders the same "N°" text as an
-    // hourly/daily forecast value — exact-text locators in the e2e specs
-    // rely on that uniqueness.
     const forecastList = Array.from({ length: 16 }, (_, index) => ({
       dt: nowSeconds + index * 3 * 60 * 60,
       main: { temp: 40 + index, feels_like: 39 + index, temp_min: 38, temp_max: 46, humidity: 55 },

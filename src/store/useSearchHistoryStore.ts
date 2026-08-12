@@ -11,6 +11,7 @@ interface SearchHistoryState {
   lastCity: SelectedLocation | null;
   history: SelectedLocation[];
   selectLocation: (location: SelectedLocation) => void;
+  setLastCity: (location: SelectedLocation) => void;
   removeLocation: (location: SelectedLocation) => void;
   clearHistory: () => void;
 }
@@ -28,6 +29,7 @@ export const useSearchHistoryStore = create<SearchHistoryState>()(
             ...state.history.filter((item) => !isSameLocation(item, location)),
           ].slice(0, MAX_HISTORY),
         })),
+      setLastCity: (location) => set({ lastCity: location }),
       removeLocation: (location) =>
         set((state) => ({
           history: state.history.filter((item) => !isSameLocation(item, location)),

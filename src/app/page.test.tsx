@@ -13,8 +13,8 @@ const renderHome = () => {
 };
 
 describe("Home", () => {
-  it("renders the app title", () => {
+  it("renders the empty-state heading", () => {
     renderHome();
-    expect(screen.getByRole("heading", { name: "Погода" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Узнайте погоду где угодно" })).toBeInTheDocument();
   });
 });

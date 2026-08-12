@@ -11,9 +11,11 @@ const condition = (main: string): WeatherCondition => ({
 
 const item = (isoWithoutMs: string, temp: number, main: string): ForecastListItem => ({
   dt: Math.floor(new Date(isoWithoutMs).getTime() / 1000),
-  main: { temp, feels_like: temp, temp_min: temp, temp_max: temp, humidity: 50 },
+  main: { temp, feels_like: temp, temp_min: temp, temp_max: temp, pressure: 1013, humidity: 50 },
   weather: [condition(main)],
   wind: { speed: 1, deg: 0 },
+  visibility: 10000,
+  clouds: { all: 0 },
   pop: 0,
   dt_txt: isoWithoutMs,
 });

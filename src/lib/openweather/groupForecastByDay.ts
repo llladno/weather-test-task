@@ -7,18 +7,18 @@ export interface DailyForecast {
   minTemp: number;
   maxTemp: number;
   condition: WeatherCondition;
+  representative: ForecastListItem;
 }
 
-const pickMiddayCondition = (
+const pickMiddayItem = (
   items: ForecastListItem[],
   timezoneOffsetSeconds: number,
-): WeatherCondition => {
-  const closestToMidday = items.reduce((best, item) => {
+): ForecastListItem => {
+  return items.reduce((best, item) => {
     const bestHour = toCityDate(best.dt, timezoneOffsetSeconds).getUTCHours();
     const itemHour = toCityDate(item.dt, timezoneOffsetSeconds).getUTCHours();
     return Math.abs(itemHour - 12) < Math.abs(bestHour - 12) ? item : best;
   });
-  return closestToMidday.weather[0] ?? FALLBACK_WEATHER_CONDITION;
 };
 
 export const groupForecastByDay = (
@@ -39,12 +39,14 @@ export const groupForecastByDay = (
 
   return Array.from(groups.entries()).map(([dayKey, dayItems]) => {
     const temps = dayItems.map((item) => item.main.temp);
+    const representative = pickMiddayItem(dayItems, timezoneOffsetSeconds);
     return {
       dayKey,
       date: toCityDate(dayItems[0].dt, timezoneOffsetSeconds),
       minTemp: Math.min(...temps),
       maxTemp: Math.max(...temps),
-      condition: pickMiddayCondition(dayItems, timezoneOffsetSeconds),
+      condition: representative.weather[0] ?? FALLBACK_WEATHER_CONDITION,
+      representative,
     };
   });
 };

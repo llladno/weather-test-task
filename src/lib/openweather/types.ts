@@ -5,9 +5,6 @@ export interface WeatherCondition {
   icon: string;
 }
 
-// OpenWeather types `weather` as an array but the API can in principle return
-// it empty; used wherever `weather[0]` is read so the UI degrades instead of
-// throwing on a missing condition.
 export const FALLBACK_WEATHER_CONDITION: WeatherCondition = {
   id: 0,
   main: "Unknown",
@@ -51,12 +48,23 @@ export interface ForecastListItem {
     feels_like: number;
     temp_min: number;
     temp_max: number;
+    pressure: number;
     humidity: number;
   };
   weather: WeatherCondition[];
   wind: { speed: number; deg: number; gust?: number };
+  visibility: number;
+  clouds: { all: number };
   pop: number;
   dt_txt: string;
+}
+
+export interface WeatherSnapshot {
+  weather: WeatherCondition[];
+  main: { temp: number; feels_like: number; pressure: number; humidity: number };
+  wind: { speed: number };
+  visibility: number;
+  clouds: { all: number };
 }
 
 export interface ForecastResponse {

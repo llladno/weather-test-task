@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { MapPin } from "lucide-react";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { UnitToggle } from "@/features/settings/UnitToggle";
@@ -23,19 +23,63 @@ import {
   DailyForecastList,
   DailyForecastListSkeleton,
 } from "@/features/forecast/DailyForecastList";
+import { DateSelector } from "@/features/forecast/DateSelector";
 import { GeolocationRequestError, useGeolocation } from "@/features/geolocation/useGeolocation";
 import { GeolocationModal } from "@/features/geolocation/GeolocationModal";
 import { useSearchHistoryStore } from "@/store/useSearchHistoryStore";
 import { Button } from "@/components/ui/Button";
+import { groupForecastByDay } from "@/lib/openweather/groupForecastByDay";
 import type { SelectedLocation } from "@/lib/types";
 
 const Home = () => {
   const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
+  const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null);
   const recordSearch = useSearchHistoryStore((state) => state.selectLocation);
+  const lastCity = useSearchHistoryStore((state) => state.lastCity);
+  const setLastCity = useSearchHistoryStore((state) => state.setLastCity);
+
+  // zustand's persist middleware rehydrates from localStorage asynchronously, so
+  // lastCity resolves a render or two after mount — adjust state during render
+  // (guarded by the synced copy below) as soon as it does, but only to restore
+  // on load, never overriding a location already in use.
+  const lastCityKey = lastCity ? `${lastCity.lat},${lastCity.lon}` : null;
+  const [syncedLastCityKey, setSyncedLastCityKey] = useState(lastCityKey);
+  if (lastCityKey !== syncedLastCityKey) {
+    setSyncedLastCityKey(lastCityKey);
+    if (lastCity && !selectedLocation) {
+      setSelectedLocation(lastCity);
+    }
+  }
 
   const weatherQuery = useCurrentWeather(selectedLocation?.lat, selectedLocation?.lon);
   const photoQuery = useCityPhoto(selectedLocation?.queryName);
-  const geolocation = useGeolocation(setSelectedLocation);
+  const geolocation = useGeolocation((location) => {
+    setSelectedLocation(location);
+    setLastCity(location);
+  });
+
+  const dailyForecasts = useMemo(
+    () =>
+      weatherQuery.data
+        ? groupForecastByDay(
+            weatherQuery.data.forecast.list,
+            weatherQuery.data.forecast.city.timezone,
+          )
+        : [],
+    [weatherQuery.data],
+  );
+
+  const selectedDayForecast = selectedDayKey
+    ? dailyForecasts.find((day) => day.dayKey === selectedDayKey)
+    : undefined;
+  const displayWeather = selectedDayForecast?.representative ?? weatherQuery.data?.current;
+
+  const locationKey = selectedLocation ? `${selectedLocation.lat},${selectedLocation.lon}` : null;
+  const [syncedLocationKey, setSyncedLocationKey] = useState(locationKey);
+  if (locationKey !== syncedLocationKey) {
+    setSyncedLocationKey(locationKey);
+    setSelectedDayKey(null);
+  }
 
   const handleSelect = (location: SelectedLocation) => {
     setSelectedLocation(location);
@@ -48,9 +92,11 @@ const Home = () => {
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="fixed inset-x-5 top-5 z-50 mx-auto grid max-w-5xl grid-cols-[auto_1fr_auto] items-center gap-4 rounded-pill border border-border-glass bg-surface-glass px-4 py-3 shadow-card backdrop-blur-md dark:shadow-card-dark sm:px-6">
-        <h1 className="shrink-0 text-xl font-bold tracking-tight text-foreground">Погода</h1>
-        <div className="mx-auto w-full max-w-md min-w-0">
+      <header className="fixed inset-x-5 top-5 z-50 mx-auto flex max-w-5xl flex-col gap-3 rounded-card border border-border-glass bg-surface-glass px-4 py-3 shadow-card backdrop-blur-md dark:shadow-card-dark sm:flex-row sm:items-center sm:gap-4 sm:rounded-pill sm:px-6">
+        <h1 className="hidden shrink-0 text-xl font-bold tracking-tight text-foreground sm:block">
+          Погода
+        </h1>
+        <div className="w-full min-w-0 sm:max-w-md">
           <SearchBar
             onSelect={handleSelect}
             onUseMyLocation={() => geolocation.mutate()}
@@ -58,13 +104,21 @@ const Home = () => {
             isLocating={geolocation.isPending}
           />
         </div>
-        <div className="flex items-center gap-3">
-          <UnitToggle />
-          <ThemeToggle />
+        <div className="flex items-center justify-between gap-3 sm:contents">
+          <DateSelector
+            dailyForecasts={dailyForecasts}
+            value={selectedDayKey}
+            onChange={setSelectedDayKey}
+            disabled={!weatherQuery.data}
+          />
+          <div className="flex items-center gap-3 sm:ml-auto">
+            <UnitToggle />
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
-      <main className="flex flex-1 flex-col items-center gap-6 px-4 pt-28 pb-16 text-center">
+      <main className="flex flex-1 flex-col items-center gap-6 px-4 pt-36 pb-16 text-center sm:pt-28">
         {!selectedLocation && (
           <div className="flex flex-col items-center gap-4">
             <div className="flex flex-col items-center gap-2">
@@ -101,19 +155,26 @@ const Home = () => {
           </p>
         )}
 
-        {selectedLocation && weatherQuery.data && (
+        {selectedLocation && weatherQuery.data && displayWeather && (
           <>
             <div className="flex w-full max-w-4xl flex-col items-center gap-4 lg:flex-row lg:items-stretch lg:justify-center">
               <CurrentWeatherCard
-                weather={weatherQuery.data.current}
+                weather={displayWeather}
                 location={selectedLocation}
                 photo={photoQuery.data}
               />
-              <WeatherDetailsPanel weather={weatherQuery.data.current} />
+              <WeatherDetailsPanel weather={displayWeather} />
             </div>
             <div className="flex w-full flex-col items-center gap-6">
-              <HourlyTemperatureChart forecast={weatherQuery.data.forecast} />
-              <DailyForecastList forecast={weatherQuery.data.forecast} />
+              <HourlyTemperatureChart
+                forecast={weatherQuery.data.forecast}
+                selectedDayKey={selectedDayKey}
+              />
+              <DailyForecastList
+                dailyForecasts={dailyForecasts}
+                selectedDayKey={selectedDayKey}
+                onSelectDay={setSelectedDayKey}
+              />
             </div>
           </>
         )}

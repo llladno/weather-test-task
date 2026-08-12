@@ -75,6 +75,12 @@ body {
   color: var(--foreground);
 }
 
+@layer base {
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -85,4 +91,39 @@ body::before {
     radial-gradient(560px circle at 92% 15%, rgb(96 165 250 / 22%), transparent 60%),
     radial-gradient(720px circle at 50% 105%, rgb(242 102 45 / 22%), transparent 60%),
     radial-gradient(480px circle at 25% 90%, rgb(196 132 252 / 16%), transparent 60%);
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(0 0 0 / 0.18) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgb(0 0 0 / 0.18);
+  border-radius: 9999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(0 0 0 / 0.3);
+}
+
+.dark .scrollbar-thin {
+  scrollbar-color: rgb(255 255 255 / 0.2) transparent;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgb(255 255 255 / 0.2);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(255 255 255 / 0.32);
 }

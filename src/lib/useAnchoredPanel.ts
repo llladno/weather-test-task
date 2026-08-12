@@ -14,11 +14,6 @@ export interface UseAnchoredPanelResult<TRoot extends HTMLElement, TPanel extend
   rect: AnchoredPanelRect | null;
 }
 
-/**
- * Positions a portalled panel under its anchor element and closes it on an
- * outside click, Escape, or window resize. `setOpen` must be referentially
- * stable (e.g. a `useState` setter) since it's an effect dependency.
- */
 export const useAnchoredPanel = <
   TRoot extends HTMLElement = HTMLDivElement,
   TPanel extends HTMLElement = HTMLDivElement,

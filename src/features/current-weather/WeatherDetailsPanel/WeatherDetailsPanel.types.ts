@@ -1,5 +1,5 @@
-import type { CurrentWeatherResponse } from "@/lib/openweather/types";
+import type { WeatherSnapshot } from "@/lib/openweather/types";
 
 export interface WeatherDetailsPanelProps {
-  weather: CurrentWeatherResponse;
+  weather: WeatherSnapshot;
 }

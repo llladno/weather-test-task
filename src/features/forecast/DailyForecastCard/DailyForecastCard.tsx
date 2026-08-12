@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import clsx from "clsx";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { getWeatherIconUrl } from "@/lib/openweather/icon";
 import { formatTemperature } from "@/lib/temperature";
@@ -8,12 +9,36 @@ import { formatCityDate, formatCityWeekday } from "@/lib/openweather/localTime";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import type { DailyForecastCardProps } from "./DailyForecastCard.types";
 
-export const DailyForecastCard = ({ forecast, animationDelay }: DailyForecastCardProps) => {
+export const DailyForecastCard = ({
+  forecast,
+  animationDelay,
+  highlighted = false,
+  onClick,
+}: DailyForecastCardProps) => {
   const unit = useSettingsStore((state) => state.unit);
 
   return (
     <GlassCard
-      className="animate-fade-in-up flex flex-col items-center gap-2 px-3 py-4 text-center"
+      id={`forecast-day-${forecast.dayKey}`}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-pressed={onClick ? highlighted : undefined}
+      onClick={onClick}
+      onKeyDown={
+        onClick
+          ? (event) => {
+              if (event.key !== "Enter" && event.key !== " ") return;
+              event.preventDefault();
+              onClick();
+            }
+          : undefined
+      }
+      className={clsx(
+        "animate-fade-in-up flex flex-col items-center gap-2 px-3 py-4 text-center transition-shadow",
+        onClick &&
+          "cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary-400",
+        highlighted && "ring-2 ring-primary-500",
+      )}
       style={{ animationDelay }}
     >
       <div>

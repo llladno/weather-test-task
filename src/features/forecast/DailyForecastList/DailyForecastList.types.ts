@@ -1,7 +1,9 @@
-import type { ForecastResponse } from "@/lib/openweather/types";
+import type { DailyForecast } from "@/lib/openweather/groupForecastByDay";
 
 export type DayRange = 3 | 5;
 
 export interface DailyForecastListProps {
-  forecast: ForecastResponse;
+  dailyForecasts: DailyForecast[];
+  selectedDayKey: string | null;
+  onSelectDay: (dayKey: string | null) => void;
 }
